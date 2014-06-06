@@ -1,4 +1,4 @@
-jenkins_helpers
+jenkins-helpers
 ===============
 
 Some jenkins related scripts, etc.
