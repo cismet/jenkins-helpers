@@ -3,8 +3,7 @@
 set -e
 
 cd $WORKSPACE
-
-if ! grep -a -q "\[INFO\] Cleaning up after release..." $WORKSPACE/../builds/$BUILD_NUMBER/log ; then
+if ! grep -a -q "\[INFO\] Cleaning up after release..." $JENKINS_HOME/jobs/$JOB_NAME/builds/$BUILD_NUMBER/log ; then
  echo "[POST RELEASE] this is no release build, skipping execution"
  exit 0
 fi

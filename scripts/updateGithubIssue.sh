@@ -1,5 +1,10 @@
 #!/bin/bash
 
+SCRIPTS_DIR=$(dirname "$0")
+
+GIT_PASSWORD=*OVERWRITTEN_BY_DOT_SECRETS*
+source "$SCRIPTS_DIR/.secrets"
+
 cd $WORKSPACE
 touch mergedIssues
 
@@ -31,6 +36,11 @@ if [ $HEAD_HASH == `git rev-list --min-parents=2 --max-parents=2 HEAD -n 1` ] ; 
 
 	BRANCH=${BRANCH:$NAMEINDEX}
 
+	if [ ${BRANCH:0:7} = "release" ] ; then
+		echo "Found release branch, skipping: $BRANCH";
+		exit 0;
+	fi
+
 	echo "Feature branch: $BRANCH ($PARENT)"
 
 	## add build job link
@@ -42,8 +52,12 @@ if [ $HEAD_HASH == `git rev-list --min-parents=2 --max-parents=2 HEAD -n 1` ] ; 
 	ISSUE_ID=`echo $BRANCH | sed -n "s/.*[/]//p" | sed -n "s/[^0-9].*//p"`
 	
 	if [ -z "$ISSUE_ID" ] ; then
-		echo "WARNING: Illegally named issue branch!"
-		exit 0
+		# try without slash ...
+		ISSUE_ID=`echo $BRANCH | sed -n "s/[^0-9].*//p"`
+		if [ -z "$ISSUE_ID" ] ; then
+			echo "WARNING: Illegally named issue branch: $BRANCH"
+			exit 0
+		fi
 	fi
 
 	if grep -Fxq "$ISSUE_ID $PARENT $HEAD_HASH" mergedIssues ; then
@@ -64,11 +78,11 @@ if [ $HEAD_HASH == `git rev-list --min-parents=2 --max-parents=2 HEAD -n 1` ] ; 
 	
 	echo "Updading issue: $URL"
 	
-	curl -u <enter-username:password-here> --data "{\"body\": \"$MESSAGE\"}" $URL
+	curl -u "ci-cismet-de:$GIT_PASSWORD" --data "{\"body\": \"$MESSAGE\"}" $URL
 
 	echo "$ISSUE_ID $PARENT $HEAD_HASH" >> mergedIssues
 else
-	echo "The most recent commit has not been a merge commit, ignoring job"
+	echo "The most recent commit $HEAD_HASH has not been a merge commit, ignoring job"
 	exit 0
 fi
 
