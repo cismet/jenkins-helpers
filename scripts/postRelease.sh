@@ -18,6 +18,8 @@ echo "[POST RELEASE] using TAGNAME = $TAGNAME"
 
 if [[ $RELEASE_BRANCH == fatal* || $ORIGIN == fatal* || $TAGNAME == fatal* ]] ; then
  echo "[POST RELEASE] illegal variable state: [RELEASE_BRANCH=$RELEASE_BRANCH|ORIGIN=$ORIGIN|TAGNAME=$TAGNAME]"
+elif [[ $RELEASE_BRANCH == *-pre || $RELEASE_BRANCH == *-pre-* || $RELEASE_BRANCH == *-prerelease || $RELEASE_BRANCH == *-prerelease-* ]] ; then 
+ echo "[POST RELEASE] skipping master- and dev- merge of pre-release branch: $RELEASE_BRANCH"
 else
  mkdir /tmp/$BUILD_TAG
  cd /tmp/$BUILD_TAG
